@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
+    // connect to NutriConnectDB database and setup db
     await mongoose.connect('mongodb://localhost:27017/NutriConnectDB');
     console.log('✅ MongoDB Connected Successfully!\n');
   } catch (err) {
