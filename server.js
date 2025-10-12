@@ -7,25 +7,27 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const connectDB = require('./utils/db'); 
 require('dotenv').config({ 
-  path: require('path').join(__dirname, 'utils', '.env') 
+  path: path.join(__dirname, 'utils', '.env') 
 });
 
 const app = express();
-const PORT = process.env.PORT || 3300;
 
-// Generate a strong 64-byte hex session secret
+// Use environment variables
+const PORT = process.env.PORT
+const MONGODB_URI = process.env.MONGO_URL;
+const NODE_ENV = process.env.NODE_ENV ;
+
+// Generate a strong 64-byte hex session secret if not provided in .env
 const generateSessionSecret = () => {
   return crypto.randomBytes(64).toString('hex');
 };
 
-// Configuration
-const MONGODB_URI = 'mongodb://localhost:27017/NutriConnectDB';
 const SESSION_SECRET = process.env.SESSION_SECRET || generateSessionSecret();
 
 // Log the generated secret (remove in production)
 if (!process.env.SESSION_SECRET) {
   console.log('\n🔑 Generated Session Secret:', SESSION_SECRET);
-  console.log('⚠️  For production, set SESSION_SECRET in .env file instead!');
+  console.log('⚠️ For production, set SESSION_SECRET in .env file instead!');
 }
 
 // Session Configuration
@@ -34,7 +36,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: NODE_ENV === 'production',
     maxAge: 24 * 60 * 60 * 1000, // 1 day
     httpOnly: true,
     sameSite: 'strict'
@@ -65,15 +67,13 @@ connectDB();
 // Import routes
 const dietitianRoutes = require('./routes/dietitianRoutes');
 const dietitianInfoRoutes = require('./routes/dietitianInfoRoutes');
-
 const authRoutes = require('./routes/authRoutes'); 
 const appRoutes = require('./routes/appRoutes');
-const dietitianverifyApp= require('./routes/verifydietitianRoutes');
+const dietitianverifyApp = require('./routes/verifydietitianRoutes');
 const organizationVerifyApp = require('./routes/verifyOrganizationRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const dietPlanRoutes = require('./routes/dietPlanRoutes');
 const labRoutes = require('./routes/labReportRoutes');
-
 const paymentRoutes = require('./routes/paymentRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const blogRoutes = require('./routes/blogRoutes');
@@ -96,7 +96,7 @@ app.use('/', bookingRoutes);
 app.use('/', blogRoutes);
 app.use('/', crudRoutes);
 app.use('/', uploadRoutes);
-app.use('/', profileRoutes); // Use consolidated profile routes
+app.use('/', profileRoutes);
 
 // Display all routes
 const expressListEndpoints = require('express-list-endpoints');
@@ -115,5 +115,5 @@ app.use((err, req, res, next) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Server is running at http://localhost:${PORT} in ${NODE_ENV} mode`);
 });
