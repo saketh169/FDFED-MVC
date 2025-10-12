@@ -1,4 +1,4 @@
-¬const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const labReportSchema = new mongoose.Schema({
     userId: {
